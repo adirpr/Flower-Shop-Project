@@ -1,0 +1,164 @@
+<!-- views/partials/header.ejs -->
+<!-- <div class="container" style="white-space:nowrap"> -->
+<a href="/" id="homePage1">
+	<img src="./images/logo.png" width="150px"/>
+</a>
+<div id="loginContainer" style="display: inline; float: right;">
+	<!-- Trigger the modal with a button -->
+	<button type="button" id="loginBtn" class="btn btn-default btn-lg" data-toggle="modal" data-target="#loginModal">Login</button>
+
+	<button type="button" id="signInBtn" class="btn btn-default btn-lg" data-toggle="modal" data-target="#signInModal">Sign In</button>
+	
+	<a class="btn btn-default btn-lg" id="logoutBtn" ng-click="logout()">
+	  <span class="glyphicon glyphicon-log-out"></span> Log out
+	</a>
+
+	<!-- Login Modal -->
+	<div class="modal fade" id="loginModal" role="dialog">
+		<div class="modal-dialog">
+		
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header" style="padding:35px 50px;">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4><span class="glyphicon glyphicon-lock"></span> Login</h4>
+				</div>
+				<div class="modal-body" style="padding: 40px 50px;">
+						<form role="form" id="loginForm" method="post">
+							<div class="form-group">
+								<label for="userName"><span class="glyphicon glyphicon-user"></span> Username</label>
+								<input type="text" class="form-control" id="userName" placeholder="Enter User Name" ng-model="userName" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="password"><span class="glyphicon glyphicon-eye-open"></span> Password</label>
+								<input type="password" class="form-control" id="password" placeholder="Enter password" ng-model="password">
+							</div>
+							<!-- <div class="checkbox"> -->
+								<!-- <label><input type="checkbox" value="" checked>Remember me</label> -->
+							<!-- </div> -->
+							<div>
+								<label for="captcha"><span class="glyphicon glyphicon-barcode"></span> Cpatcha</label>
+								<img src="data:image/jpeg;base64,<%= valicode %>"/>
+								<input type="captcha" class="form-control" id="captcha" placeholder="Enter captcha" ng-model="captcha">
+							</div>
+							</br>
+							<button type="submit" class="btn btn-success btn-block" ng-click="login()"><span class="glyphicon glyphicon-off"></span> Login</button>
+						</form>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<!-- <p>Not a member? <a href="#">Sign Up</a></p> -->
+					<!-- <p>Forgot <a href="#">Password?</a></p> -->
+				</div>
+			</div>
+		
+		</div>
+	</div>
+
+	<!-- Sign In Modal -->
+	<div class="modal fade" id="signInModal" role="dialog">
+		<div class="modal-dialog">
+		
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header" style="padding:35px 50px;">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4><span class="glyphicon glyphicon-lock"></span> Sign In</h4>
+				</div>
+				<div class="modal-body" style="padding: 40px 50px;">
+						<form role="form" id="signInForm" method="post">
+							<div class="form-group">
+								<label for="firstName">Id</label>
+								<input type="text" class="form-control" id="id" placeholder="Enter Id" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="firstName">First Name</label>
+								<input type="text" class="form-control" id="firstName" placeholder="Enter First Name" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="lastName"> Last Name</label>
+								<input type="text" class="form-control" id="lastName" placeholder="Enter Last Name">
+							</div>			
+							<div class="form-group">
+								<label for="userName"> Username</label>
+								<input type="text" class="form-control" id="userName" placeholder="Enter UserName">
+							</div>
+							<div class="form-group">
+								<label for="password"> Password</label>
+								<input type="password" class="form-control" id="password" placeholder="Enter Password">
+							</div>
+							<div class="form-group">
+								<label for="age"> Age</label>
+								<input type="number" class="form-control" id="age" min="0" placeholder="Enter Age">
+							</div>
+							<div>
+								<label for="captcha">Cpatcha</label>
+								<img src="data:image/jpeg;base64,<%= valicode %>"/>
+								<input type="captcha" class="form-control" id="captcha" placeholder="Enter captcha" ng-model="captcha">
+							</div>
+							</br>
+							<button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Sign In</button>
+						</form>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<!-- <p>Not a member? <a href="#">Sign Up</a></p> -->
+					<!-- <p>Forgot <a href="#">Password?</a></p> -->
+				</div>
+			</div>
+		
+		</div>
+	</div>
+	
+</div>
+
+<nav class="navbar navbar-default" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a href="/" class="navbar-brand" id="homePage2">Home</a>
+		</div>
+		<ul class="nav navbar-nav">
+			<li><a href="#!catalog" id="catalogPage">Flower Catalog</a></li>
+			<li><a href="#!userManagement" id="userManagementPage">User Management</a></li>
+			<li><a href="#!branchManagement" id="branchManagementPage">Branch Management</a></li>
+		</ul>
+		
+		<ul class="nav navbar-nav navbar-right">
+			<li><a href="#!about" id="aboutPage">About Us</a></li>
+			<li><a href="#!contact" id="contactPage">Contact Us</a></li>
+			<li><a href="#!chat" id="chatPage">Chat</a></li>
+		</ul>
+	</div>
+</nav>
+
+<script>
+// Attaches a submit handler to the ADD CLIENT form
+$(document).ready(function() {
+    $("#signInForm").submit(function(event) {
+        // Stops form from submitting normally
+        event.preventDefault();
+
+        // Gets some values from elements on the page
+        var $form = $(this),
+            id = $form.find("#id").val(),
+            userName = $form.find("#userName").val(),
+            password = $form.find("#password").val(),
+            firstName = $form.find("#firstName").val(),
+            lastName = $form.find("#lastName").val(),
+            age = $form.find("#age").val(),
+            captcha = $form.find("#captcha").val(),
+
+            dataString = { id: id, userName: userName, password: password, firstName: firstName, lastName: lastName, branchNumber: -1, age: age, captcha: captcha };
+        // url = $form.attr("action");
+
+        // Loads data from a server using an AJAX HTTP POST request
+        $.post("/addClient", dataString, function(data, status) {
+            alert(data); // show response from the server
+
+            if (status == "success" && data == "Added client successfully") {
+                $("#signInModal").modal("toggle");
+            }
+        });
+    });
+});
+</script>

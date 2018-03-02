@@ -1,0 +1,28 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head', {title: title}) %>
+</head>
+
+<body class="container" ng-app="ProjectSPA" ng-controller="mainController">
+
+    <header>
+        <%- include('partials/header') %>
+    </header>
+    
+    <!-- MAIN CONTENT AND INJECTED VIEWS -->
+    <div id="main">
+        <!-- Angular templating -->
+        <div ng-view>
+            <!-- This is where content will be injected -->
+        </div>
+    </main>
+    
+    <footer>
+        <%- include('partials/footer') %>
+    </footer>
+
+</body>
+</html>

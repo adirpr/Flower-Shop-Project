@@ -1,0 +1,12 @@
+<!-- views/partials/branchesGrid.ejs -->
+<div class="jumbotron text-center">
+	<h2><strong>{{ message }}</strong></h2>
+</div>
+
+<div class="row">
+	<font size="3">
+		<% branches.forEach(function(branch) { %>
+			<%- include("partials/branchesGrid", {id: branch.id, name: branch.name, active: branch.active, address: branch.address, phoneNumber: branch.phoneNumber}); %>
+		<% }); %>
+	</font size>
+</div>

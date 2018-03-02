@@ -1,0 +1,233 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('project:server');
+var http = require('http');
+var mosca = require('mosca');
+var mqtt = require('mqtt');
+var bcrypt = require('bcrypt');
+
+var wsAddress = 'ws://localhost:1884';
+var Room = require('../models/room');
+var Message = require('../models/message');
+var topicKeywords = ['addroom', 'removeroom', 'totalrooms', 'totalclients', 'online', 'offline'];
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '8080');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(8080, function() {
+    console.log("Flower shop site - listening on port 8080.");
+});
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    var bind = typeof port === 'string' ?
+        'Pipe ' + port :
+        'Port ' + port;
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+    var addr = server.address();
+    var bind = typeof addr === 'string' ?
+        'pipe ' + addr :
+        'port ' + addr.port;
+    debug('Listening on ' + bind);
+}
+
+app.post('/setPassword', function(req, res) {
+    var room = req.body.room;
+    var password = req.body.password;
+    var hashPassword = bcrypt.hashSync(password, 10);
+    Room.update({ _id: room }, { $set: { password: hashPassword, protected: true } }, { upsert: true })
+        .then(function(doc) {
+            res.sendStatus(200);
+        })
+        .catch(function(err) {
+            res.sendStatus(500);
+        });
+});
+
+app.post('/checkPassword', function(req, res) {
+    var room = req.body.room;
+    var password = req.body.password;
+    Room.findOne({ _id: room })
+        .then(function(doc) {
+            if (bcrypt.compareSync(password, doc.password)) {
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(401);
+            }
+        })
+        .catch(function(err) {
+            res.sendStatus(401);
+        });
+});
+
+// Mosca Settings
+var options = {
+    type: 'mongo',
+    url: 'mongodb://localhost:27017/mosca',
+    pubsubCollection: 'messages',
+    mongo: {}
+};
+
+var settings = {
+    port: 1883,
+    stats: false,
+    logger: {},
+    http: {
+        port: 1884,
+        static: __dirname + "/public",
+        bundle: true
+    },
+    backend: options
+};
+
+var mqttServer = new mosca.Server(settings);
+var mqttClient = mqtt.connect(wsAddress, { keepalive: 0 });
+process.on('SIGINT', function() {
+    mqttClient.end();
+    Room.remove({}, function(err) {});
+});
+
+// fired when a message is received
+mqttServer.on('published', function(packet, client) {
+    if (topicKeywords.indexOf(packet.topic) === -1 && !packet.topic.includes('$SYS')) {
+        var messageJson = JSON.parse(packet.payload.toString('utf-8'));
+        var message = new Message({ from: messageJson.nickname, content: messageJson.message, room: packet.topic, date: new Date() });
+        message.save();
+    }
+})
+
+mqttServer.on('subscribed', function(topic, client) {
+    if (topicKeywords.indexOf(topic) === -1) {
+        getMqttClient().publish('online', JSON.stringify({ room: topic, nickname: client.id }));
+        addRoomAndClient(topic, client);
+    }
+});
+
+mqttServer.on('unsubscribed', function(topic, client) {
+    if (topicKeywords.indexOf(topic) === -1) {
+        getMqttClient().publish('offline', JSON.stringify({ room: topic, nickname: client.id }));
+        removeClientFromRoom(topic, client);
+    }
+});
+
+// Chat Helper Functions
+function addRoomAndClient(topic, client) {
+    Room.update({ _id: topic }, { $push: { clientIds: client.id } }, { upsert: true })
+        .then(function(data) {
+            notifyTotalRooms();
+            notifyTotalClients(topic);
+        });
+}
+
+function removeClientFromRoom(topic, client) {
+    Room.update({ _id: topic }, { $pull: { clientIds: client.id } }, { upsert: true }).then(function(doc) {
+        Room.findOne({ _id: topic }, '_id clientIds protected').then(function(doc) {
+            if (doc.clientIds.length > 0) {
+                notifyTotalRooms();
+                notifyTotalClients(topic);
+            } else {
+                Room.remove({ _id: topic }, function(err) {
+                    if (!err) {
+                        getMqttClient().publish('removeroom', JSON.stringify({ room: topic }));
+                    }
+                });
+            }
+        })
+    })
+}
+
+function notifyTotalRooms() {
+    Room.find({}, '_id clientIds protected')
+        .then(function(docs) {
+            getMqttClient().publish('totalrooms', JSON.stringify(docs));
+        });
+}
+
+function notifyTotalClients(topic) {
+    Room.findOne({ _id: topic }, '_id clientIds protected')
+        .then(function(doc) {
+            getMqttClient().publish('totalclients', JSON.stringify(doc));
+        });
+}
+
+// Mosca Persistence
+var onPersistenceReady = function() {
+    persistence.wire(server);
+}
+
+var getMqttClient = function() {
+    if (!mqttClient || !mqttClient.connected) {
+        mqttClient = mqtt.connect(wsAddress, { keepalive: 0 });
+    }
+    return mqttClient;
+}
+
+var persistence = mosca.persistence.Mongo(options, onPersistenceReady);

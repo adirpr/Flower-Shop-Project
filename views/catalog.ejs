@@ -1,0 +1,13 @@
+<!-- views/catalog.ejs -->
+<div class="jumbotron text-center">
+	<h2><strong>{{ message }}</strong></h2>
+	<h3>Enjoy the vast variety of flowers from all around the world!</h3>
+</div>
+
+<div class="row">
+	<font size="3">
+		<% flowers.forEach(function(flower) { %>
+		<%- include("partials/catalogGrid", {name: flower.name, color: flower.color, image: flower.image, price: flower.price}); %>
+		<% }); %>
+	</font size>
+</div>

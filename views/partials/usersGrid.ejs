@@ -1,0 +1,156 @@
+<!-- views/partials/usersGrid.ejs  -->
+<div class="col-sm-4" align="left" style="overflow:auto">
+	<li class="list-group-item">
+		<u>Id</u>: <strong class="idData<%= index %>"><%= id %></strong> </br>
+		<u>First Name</u>: <strong class="firstNameData<%= index %>"><%= firstName %></strong> </br>
+		<u>Last Name</u>: <strong class="lastNameData<%= index %>"><%= lastName %></strong> </br>
+		<u>UserName</u>: <strong class="userNameData<%= index %>"><%= userName %></strong> </br>
+		
+		<% if (currentUserOccupation == "Manager") { %>
+			<u>Password</u>: <strong class="passwordData<%= index %>"><%= password %></strong> </br>
+		<% } %>
+
+		<u>Age</u>: <strong class="ageData<%= index %>"><%= age %></strong> </br>
+		<u>Occupation</u>: <strong class="occupationData<%= index %>"><%= occupation %></strong> </br>
+		
+		<% if (branchNumber != -1) { %>
+			<u>Branch Number</u>: <strong class="branchNumberData<%= index %>"><%= branchNumber %></strong>
+		<% } %>
+		
+		<% if (currentUserOccupation == "Manager") { %>
+			<div align="center">
+				<!-- Trigger the modal with a button -->
+				<button type="button" id="updateUserBtn<%= index %>" class="btn btn-info" data-toggle="modal" data-target="#updateUserModal" style="margin: 10px;">
+					<span class="glyphicon glyphicon-edit"></span>
+					<temp>Update</temp>
+				</button>
+
+				<!-- Trigger the modal with a button -->
+				<button type="button" id="deleteUserBtn<%= index %>" class="btn btn-danger" style="margin: 10px;">
+					<span class="glyphicon glyphicon-remove"></span>
+					<temp>Delete</temp>
+				</button>
+			</div>
+		<% } %>
+	</li> </br>
+</div>
+
+<script>
+var tempIndex;
+
+	// Attaches a click handler to the FILLING of update user form MODAL
+	$(document).ready(function() {
+		$(".btn.btn-info").click(function(event) {
+			// Extracts card number from id attribute of the clicked card button 
+			var currentIndex = $(this).attr("id").substr(13, 1);
+			tempIndex = currentIndex;
+
+			$("#updateUserModal").find("#firstName").val($(".firstNameData" + currentIndex).html());
+			$("#updateUserModal").find("#lastName").val($(".lastNameData" + currentIndex).html());
+			$("#updateUserModal").find("#userName").val($(".userNameData" + currentIndex).html());
+			$("#updateUserModal").find("#password").val($(".passwordData" + currentIndex).html());
+			$("#updateUserModal").find("#age").val($(".ageData" + currentIndex).html());
+			$("#updateUserModal").find("#occupation").val($(".occupationData" + currentIndex).html());
+			$("#updateUserModal").find("#branchNumber").val($(".branchNumberData" + currentIndex).html());
+		});
+	});
+
+	// Attaches a click handler to the UPDATE user form
+	$(document).ready(function() {
+		$("#updateUserForm").submit(function(event) {
+			// Stops form from submitting normally
+			event.preventDefault();
+
+			if(tempIndex == <%= index %>) {
+				var $form 		= $(this),
+					firstName 	= $form.find("#firstName").val(),
+					lastName 	= $form.find("#lastName").val(),
+					userName 	= $form.find("#userName").val(),
+					// password 	= $form.find("#password").val(),
+					age 		= $form.find("#age").val(),
+					occupation 	= $form.find("#occupation").val(),
+					branchNumber = $form.find("#branchNumber").val(),
+
+				dataString 	= { firstName: firstName, lastName: lastName, userName: userName, age: age, occupation: occupation, branchNumber: branchNumber };
+
+				// Loads data from a server using an AJAX HTTP POST request
+				$.post("/updateUser", dataString, function(data, status) {
+					$(".btn.btn-info").attr("disabled", true);
+					$(".btn.btn-danger").attr("disabled", true);
+		
+					if (status == "success" && data == "Updated user successfully") {
+						// Pops a response from the server
+						alert(data);
+
+						$(".btn.btn-info").attr("disabled", false);
+						$(".btn.btn-danger").attr("disabled", false);
+						$("#updateUserModal").modal("toggle");
+						
+						doAfterSuccess("#updateUserBtn", "#deleteUserBtn", tempIndex, "Updated");
+					}
+					else if (status == "error" || status == "timeout" || data == "Error deleting this user")
+						doAfterErrorOrTimeout("#updateUserBtn", tempIndex);
+				});
+			}
+		});
+	});
+
+	// Attaches a click handler to the DELETE user form
+	$(document).ready(function() {
+		$(".btn.btn-danger").click(function(event) {
+			var userName;
+
+			// Stops form from submitting normally
+			event.preventDefault();
+
+			// Extracts card number from id attribute of the clicked card button 
+			var currentIndex = $(this).attr("id").substr(13, 1);
+
+			if(currentIndex == <%= index %>) {
+				var userName 	= $(".userNameData" + currentIndex).html(),
+					dataString 	= { userName: userName };
+				
+				// Loads data from a server using an AJAX HTTP POST request
+				$.post("/deleteUser", dataString, function(data, status) {
+
+					if (status == "success" && data == "Deleted user successfully") {
+						// Pops a response from the server
+						alert(data);
+						doAfterSuccess("#deleteUserBtn", "#updateUserBtn", currentIndex, "Deleted");
+					} else if (status == "error" || status == "timeout" || data == "Error deleting this user")
+						doAfterErrorOrTimeout("#deleteUserBtn", currentIndex);
+				});
+			}
+		});
+	});
+
+	function doAfterSuccess(selectedButton, notSelectedBtn, currentIndex, changeBtnTxt) {
+		$("#refreshBtn").fadeOut(250, function() {
+			$(this).attr("class", "btn btn-success").fadeIn(500);
+			$(this).animate({fontSize: "2em"}, "slow");
+		});
+		$(selectedButton + currentIndex).fadeOut(250, function() {
+			$(this).attr("class", "btn btn-success").fadeIn(500);
+			$(this).last().html(changeBtnTxt);
+			$(this).attr("disabled", true);
+		});
+		$(notSelectedBtn + currentIndex).fadeOut(250, function() {
+			$(this).fadeIn(500);
+			$(this).attr("disabled", true);
+		});
+	};
+
+	function doAfterErrorOrTimeout(selectedButton, currentIndex) {
+		$(".btn.btn-info").attr("disabled", true);
+		$(".btn.btn-danger").attr("disabled", true);
+		
+		$("#refreshBtn").fadeOut(250, function() {
+			$(this).attr("class", "btn btn-danger").fadeIn(500);
+			$(this).animate({fontSize: "2em"}, "slow");
+		});
+		$(selectedButton + currentIndex).fadeOut(250, function() {
+			$(this).last().html("Error");
+			$(this).attr("class", "btn btn-danger").fadeIn(500);
+		});
+	};
+</script>

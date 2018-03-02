@@ -1,0 +1,295 @@
+<!-- views/partials/userManagement.ejs -->
+<div class="jumbotron text-center">
+	<h2><strong>{{ message }}</strong></h2>
+</div>
+
+<div align="center" style="margin-top: 1%; margin-bottom: 1%;">
+	<button type="button" id="refreshBtn" class="btn btn-primary" ng-click="refresh()">
+		<span class="glyphicon glyphicon-refresh"></span> Refresh Page
+	</button>
+	</br>
+	<button type="button" id="addClientBtn" class="btn btn-info" data-toggle="modal" data-target="#addClientModal" style="margin-top: 1%; margin-bottom: 1%;">
+		<span class="glyphicon glyphicon-plus"></span> Add Client
+	</button>
+
+	<% if (currentUserOccupation == "Manager") { %>
+		<button type="button" id="addEmployeeBtn" class="btn btn-info" data-toggle="modal" data-target="#addEmployeeModal" style="margin-top: 1%; margin-bottom: 1%;">
+			<span class="glyphicon glyphicon-plus"></span> Add Employee
+		</button>
+	<% } %>
+</div>
+
+<div class="row">
+	<font size="3">
+	<% var index = 0; %>
+		<% users.forEach(function(user) { %>
+			<%- include("partials/usersGrid", {id: user.id, userName: user.userName, password: user.password, firstName: user.firstName, lastName: user.lastName, occupation: user.occupation, age: user.age,branchNumber: user.branchNumber, currentUserOccupation: currentUserOccupation, index: index}); %>
+			<% index++; %>
+		<% }); %>
+	</font size>
+</div>
+
+<!-- Add Client Modal -->
+<div class="container">
+
+	<!-- Modal -->
+	<div class="modal fade" id="addClientModal" role="dialog">
+		<div class="modal-dialog">
+		
+			<!-- Client Modal content-->
+			<div class="modal-content">
+				<div class="modal-header" style="padding: 35px 50px;">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4><span class="glyphicon glyphicon-lock"></span> Add Client</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+						<form role="form" id="addClientForm" method="post">
+							<div class="form-group">
+								<label for="firstName">Id</label>
+								<input type="text" class="form-control" id="id" placeholder="Enter Id" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="firstName">First Name</label>
+								<input type="text" class="form-control" id="firstName" placeholder="Enter First Name" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="lastName"> Last Name</label>
+								<input type="text" class="form-control" id="lastName" placeholder="Enter Last Name">
+							</div>			
+							<div class="form-group">
+								<label for="userName"> Username</label>
+								<input type="text" class="form-control" id="userName" placeholder="Enter UserName">
+							</div>
+							<div class="form-group">
+								<label for="password"> Password</label>
+								<input type="password" class="form-control" id="password" placeholder="Enter Password">
+							</div>
+							<div class="form-group">
+								<label for="age"> Age</label>
+								<input type="number" class="form-control" id="age" min="0" placeholder="Enter Age">
+							</div>
+							<button type="submit" class="btn btn-success btn-block" id="addClientBtnForm"><span class="glyphicon glyphicon-off"></span> Add</button>
+						</form>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+				</div>
+			</div>
+		  
+		</div>
+	</div> 
+</div>
+
+<!-- Add Employee Modal -->
+<div class="container">
+
+	<!-- Modal -->
+	<div class="modal fade" id="addEmployeeModal" role="dialog">
+		<div class="modal-dialog">
+		
+			<!-- Employee Modal content-->
+			<div class="modal-content">
+				<div class="modal-header" style="padding: 35px 50px;">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4><span class="glyphicon glyphicon-lock"></span> Add Employee</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+						<form role="form" id="addEmployeeForm" method="post" action="#">
+							<div class="form-group">
+								<label for="Id">Id</label>
+								<input type="text" class="form-control" id="id" placeholder="Enter Id" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="firstName">First Name</label>
+								<input type="text" class="form-control" id="firstName" placeholder="Enter First Name" autofocus>
+							</div>
+							<div class="form-group">
+								<label for="lastName"> Last Name</label>
+								<input type="text" class="form-control" id="lastName" placeholder="Enter Last Name">
+							</div>			
+							<div class="form-group">
+								<label for="userName"> Username</label>
+								<input type="text" class="form-control" id="userName" placeholder="Enter UserName">
+							</div>
+							<div class="form-group">
+								<label for="password"> Password</label>
+								<input type="password" class="form-control" id="password" placeholder="Enter Password">
+							</div>
+							<div class="form-group">
+								<label for="age"> Age</label>
+								<input type="number" class="form-control" id="age" min="0" placeholder="Enter Age">
+							</div>
+							<button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Add</button>
+						</form>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<!-- <p>Not a member? <a href="#">Sign Up</a></p> -->
+					<!-- <p>Forgot <a href="#">Password?</a></p> -->
+				</div>
+			</div>
+		  
+		</div>
+	</div> 
+</div>
+
+<!-- Update User Modal -->
+<div class="container">
+
+	<!-- Modal -->
+	<div class="modal fade" id="updateUserModal" role="dialog">
+		<div class="modal-dialog">
+		
+			<!-- Employee Modal content-->
+			<div class="modal-content">
+				<div class="modal-header" style="padding: 35px 50px;">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4><span class="glyphicon glyphicon-lock"></span> Update User</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+					<form role="form" id="updateUserForm" method="post" action="#">
+						<div class="form-group">
+							<label for="firstName">First Name</label>
+							<input type="text" class="form-control" id="firstName" placeholder="Enter First Name" autofocus>
+						</div>
+						<div class="form-group">
+							<label for="lastName"> Last Name</label>
+							<input type="text" class="form-control" id="lastName" placeholder="Enter Last Name">
+						</div>			
+						<div class="form-group">
+							<label for="userName"> Username</label>
+							<input type="text" class="form-control" id="userName" placeholder="Enter Employee Name">
+						</div>
+						<% if (currentUserOccupation == "Manager") { %>
+							<div class="form-group">
+								<label for="password"> Password</label>
+								<input type="password" class="form-control" id="password" placeholder="Enter Password">
+							</div>
+						<% } %>
+						<div class="form-group">
+							<label for="age"> Age</label>
+							<input type="number" class="form-control" id="age" min="0" placeholder="Enter Age">
+						</div>
+						<div class="form-group">
+							<label for="age"> Occupation</label>
+							<input type="text" class="form-control" id="occupation" placeholder="Enter Occupation">
+						</div>
+						<div class="form-group">
+							<label for="age"> Branch Number</label>
+							<input type="text" class="form-control" id="branchNumber" placeholder="Enter Branch Number">
+						</div>
+						<button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Update</button>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<!-- <p>Not a member? <a href="#">Sign Up</a></p> -->
+					<!-- <p>Forgot <a href="#">Password?</a></p> -->
+				</div>
+			</div>
+		  
+		</div>
+	</div> 
+</div>
+
+<script>
+// Attaches a submit handler to the ADD CLIENT form
+$(document).ready(function() {
+    $("#addClientForm").submit(function(event) {
+        // Stops form from submitting normally
+        event.preventDefault();
+
+        // Gets some values from elements on the page
+        var $form = $(this),
+            id = $form.find("#id").val(),
+            userName = $form.find("#userName").val(),
+            password = $form.find("#password").val(),
+            firstName = $form.find("#firstName").val(),
+            lastName = $form.find("#lastName").val(),
+            age = $form.find("#age").val(),
+
+            dataString = { id: id, userName: userName, password: password, firstName: firstName, lastName: lastName, branchNumber: -1, age: age };
+        // url = $form.attr("action");
+
+        // Loads data from a server using an AJAX HTTP POST request
+        $.post("/addClient", dataString, function(data, status) {
+            alert(data); // show response from the server
+
+            if (status == "success" && data == "Added client successfully") {
+
+                $("#addClientModal").modal("toggle");
+
+                $("#refreshBtn").fadeOut(250, function() {
+                    $(this).attr("class", "btn btn-success").fadeIn(500);
+                    $(this).animate({ fontSize: "2em" }, "slow");
+                });
+                $("#addClientBtn").fadeOut(250, function() {
+                    $(this).attr("class", "btn btn-success").fadeIn(500);
+                });
+            }
+        });
+    });
+});
+
+// Attaches a submit handler to the ADD EMPLOYEE form
+$(document).ready(function() {
+    $("#addEmployeeForm").submit(function(event) {
+        // Stops form from submitting normally
+        event.preventDefault();
+
+        // Gets some values from elements on the page
+        var $form = $(this),
+            firstName = $form.find("#firstName").val(),
+            lastName = $form.find("#lastName").val(),
+            userName = $form.find("#userName").val(),
+            password = $form.find("#password").val(),
+            age = $form.find("#age").val(),
+
+            dataString = { firstName: firstName, lastName: lastName, userName: userName, password: password, age: age };
+        // url = $form.attr("action");
+
+        // Loads data from a server using an AJAX HTTP POST request
+        $.post("/addEmployee", dataString, function(data, status) {
+            alert(data); // show response from the server
+
+            if (status == "success" && data == "Added employee successfully") {
+
+                $("#addEmployeeModal").modal("toggle");
+
+                $("#refreshBtn").fadeOut(250, function() {
+                    $(this).attr("class", "btn btn-success").fadeIn(500);
+                    $(this).animate({ fontSize: "2em" }, "slow");
+                });
+                $("#addEmployeeBtn").fadeOut(250, function() {
+                    $(this).attr("class", "btn btn-success").fadeIn(500);
+                });
+            }
+        });
+    });
+});
+
+function doAfterSuccessAdding() {
+
+};
+
+function doAfterErrorOrTimoutoutAdding() {
+
+};
+
+// Attaches a click handler to the REFRESH userManagement page
+$(document).ready(function() {
+    $("#refreshBt").click(function() {
+        $.get("/userManagement", { userName: currentUserName }, function(data, status) {
+            if (status == "success") {
+				$("#main").fadeOut(0, function() {
+					$(this).fadeIn(1500);
+				});
+
+                $("html, body").animate({
+                    scrollTop: $(".container-fluid").offset().top
+                }, 1500);
+            }
+        });
+    });
+});
+</script>
